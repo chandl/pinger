@@ -1,4 +1,4 @@
-#Version 1.00, Updated Nov 18, 2015
+#Version 1.10, Updated Nov 22, 2015
 
 #Made by Chandler Severson and Abdullah Alshubaili
 #CS 336, Networks, Term Project, Southern Oregon University
@@ -9,6 +9,7 @@
 
 clear
 #this is to make it more user friendly, this is skipped if user is already authenticated as sudoer
+echo "Pinger requires root/sudo access to work properly."
 echo "Please Enter your Administrative (sudo) password: "
 sudo echo "Success!" 
 
@@ -19,7 +20,8 @@ mkdir -p ./stats
 
 
 #goAgain(), prompts user asking if they want to use the program again, calls mainMenu if they do
-goAgain(){
+goAgain()
+{
 	while true; do
 		echo -e "\n"
 		read -p "Go again? (y/n)" yn
@@ -37,13 +39,15 @@ goAgain(){
 }
 
 #Stops the script's execution, start the script using "bash pinger.sh" to avoid your entire terminal being exited
-endProgram(){
+endProgram()
+{
 	echo "Goodbye! Thanks for using Pinger."
 	exit 1
 }
 
 #displays information about the program, gets input from user for the ip/domain of what they want to use
-mainMenu(){
+mainMenu()
+{
 	clear
 	echo "========================================"
 	echo "|--------------------------------------|"
@@ -60,7 +64,8 @@ mainMenu(){
 }
 
 #Prints out the menu for selections and calls the selector method
-selMenu(){
+selMenu()
+{
 	clear
 	echo "========== $name =========="
 	echo "1: Ping $name"
@@ -73,7 +78,8 @@ selMenu(){
 }
 
 #Gets the user's selection, protecting against invalid input
-selector() {
+selector() 
+{
 while true; do
 	read -p "Make your Selection: " sel
 	
@@ -107,25 +113,42 @@ done
 }
 
 
-function normalPing 
+normalPing()
 {
-	sudo ping -fc 30 $name
+	sudo ping -ac 5 $name
 	goAgain
 }
-function statsPing 
-{
-	sudo ping -a -c 5 $name
+statsPing()
+{	
+	echo "Pinging $name ..."
+	sudo ping -fc 30 $name > ./stats/$name.out
+	
+	#offline=`grep -c '0 packets received' ./stats/$name.out`
+	
+	if [ `grep -c '0 packets received' ./stats/$name.out` -eq 1 ]
+	then
+		echo -e "\n\n$name is offline or has blocked pings."
+		sudo rm ./stats/$name.out
+	else
+		lineA=`grep 'transmitted' ./stats/$name.out`
+		lineB=`grep 'round-trip' ./stats/$name.out`
+		
+		echo -e "==========\nReport for $name:\n" > ./stats/$name.txt
+		
+		#########ADD IN packets info (transmitted/received/loss)
+		
+		grep 'round-trip' ./stats/$name.out| awk '{print $4}' | awk -F '/' '{print "Round-Trip-Time (RTT) info:\n\tMinimum: "$1 " miliseconds\n\tMaximum: " $3 " miliseconds\n\tAverage: " $2 " miliseconds\n\tStandard Deviation: " $4 " miliseconds"}' >> ./stats/$name.txt
+	fi
+	
 	goAgain
 }
 
-function whoisFunc
+whoisFunc()
 {
-	
 	sudo whois $name > ./whoisLogs/$name.out
 	
 	#Seeing if the whois returns nothing (e.g. google.com doesn't return anything when we do this)
 	lineCount=`grep -c -E -A 8 'Registrant|Administrative' ./whoisLogs/$name.out`
-		
 	if [ $lineCount -eq 0 ] 
 	then
 		echo -e "\n\nNo WHOIS information found for $name"
@@ -136,6 +159,7 @@ function whoisFunc
 		sudo rm ./whoisLogs/$name.out
 		more ./whoisLogs/$name.txt
 		echo -e "\n\nWHOIS information for $name saved in ./whoisLogs/$name.txt"
+		
 
 	fi
 	
@@ -146,4 +170,28 @@ function whoisFunc
 #This is where the first mainMenu call is.
 mainMenu 
 
+
+
+
+
+
+
+
+#This is the format of the statistic report file.
+
+#===============
+#   Report:
+#Packets Transmitted: X
+#Packets Received: X
+#Packet Loss: X%
+#
+#Round-Trip-Time (RTT) info:
+#	Minimum: X.xxx miliseconds
+#	Maximum: XX.xxx miliseconds
+#	
+#	Average: XX.xxx miliseconds
+#
+#	Standard Deviation: XX.xxx miliseconds
+#	95% of Ping RTTs to [site] will be between: XX.xxx and XX.xxx miliseconds
+#================
 
