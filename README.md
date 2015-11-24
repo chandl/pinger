@@ -1,6 +1,6 @@
 # [Pinger](http://seversonc.me/pinger)
 
-A UNIX based script that expands on the built-in ping program. Provides a user friendly layout and useful statistical information about pings.
+A UNIX based script that expands on the built-in ping and networking tools. Provides a user friendly layout and useful and clear information and analysis for pings and whois information.
 
 ## Getting Started
 
