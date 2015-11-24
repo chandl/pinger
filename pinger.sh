@@ -145,11 +145,11 @@ statsPing()
 		grep 'transmitted' ./stats/$name.out | awk -F ", " '{print "\t"$1"\n\t"$2"\n\t"$3"\n"}' >> ./stats/$name.txt
 		#------------------------------------------------------#
 		#RTT Info section of report
-		stddev=`grep 'round-trip' ./stats/$name.out| awk '{print $4}' | awk -F '/' '{print $4}'`
-		avgping=`grep 'round-trip' ./stats/$name.out| awk '{print $4}' | awk -F '/' '{print $2}'`
+		stddev=`grep 'min/avg/max' ./stats/$name.out| awk '{print $4}' | awk -F '/' '{print $4}'`
+		avgping=`grep 'min/avg/max' ./stats/$name.out| awk '{print $4}' | awk -F '/' '{print $2}'`
 		minTime=`echo $avgping - 2 \* $stddev | bc -l`
 		maxTime=`echo $avgping + 2 \* $stddev | bc -l`
-		grep 'round-trip' ./stats/$name.out| awk '{print $4}' | awk -F '/' '{print "Round-Trip-Time (RTT) info:\n\tMinimum: "$1 " milliseconds\n\tMaximum: " $3 " milliseconds\n\tAverage: " $2 " milliseconds\n\tStandard Deviation: " $4 " milliseconds"}' >> ./stats/$name.txt
+		grep 'min/avg/max' ./stats/$name.out| awk '{print $4}' | awk -F '/' '{print "Round-Trip-Time (RTT) info:\n\tMinimum: "$1 " milliseconds\n\tMaximum: " $3 " milliseconds\n\tAverage: " $2 " milliseconds\n\tStandard Deviation: " $4 " milliseconds"}' >> ./stats/$name.txt
 		echo -e "\t95% of ping RTTs to $name will be between $minTime ms and $maxTime ms" >> ./stats/$name.txt
 		#------------------------------------------------------#
 		echo -e "==============================" >> ./stats/$name.txt
